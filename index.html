@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Agenda</title>
+<meta name="theme-color" content="#14304f">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Agenda">
+<style>
+  :root{--nav:#14304f;--fondo:#f2f4f7;--texto:#17202b;--gris:#5d6876;--borde:#dde2e9;--verde:#2e7d4f;--rojo:#a3302a}
+  [hidden]{display:none!important}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;background:var(--fondo);color:var(--texto);
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:18px;line-height:1.4}
+  svg.i{width:1.2em;height:1.2em;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none;vertical-align:middle}
+  header{position:sticky;top:0;z-index:5;background:var(--nav);color:#fff;
+    padding:calc(env(safe-area-inset-top) + 10px) 14px 10px;display:flex;align-items:center;gap:12px;min-height:66px}
+  #logo{height:42px;max-width:120px;object-fit:contain;background:#fff;border-radius:8px;padding:4px 6px}
+  .htxt{flex:1;min-width:0}
+  header h1{font-size:1.2rem;margin:0;font-weight:700;letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #sub{font-size:.85rem;opacity:.75}
+  .hbtn{background:rgba(255,255,255,.12);color:#fff;border:0;border-radius:10px;font-size:1rem;
+    padding:10px 12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:4px}
+  main{padding:16px 14px 120px;max-width:680px;margin:0 auto}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .tile{background:#fff;border:1px solid var(--borde);border-radius:14px;padding:14px;min-height:108px;text-align:left;
+    display:flex;flex-direction:column;justify-content:space-between;gap:10px;cursor:pointer;color:var(--texto);font:inherit}
+  .tile:active{background:#f7f9fb}
+  .tile .ic{width:44px;height:44px;border-radius:11px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.25rem}
+  .tile b{font-size:1.05rem;display:block}
+  .tile small{color:var(--gris);font-size:.88rem}
+  h2{font-size:.85rem;text-transform:uppercase;letter-spacing:.8px;color:var(--gris);margin:26px 2px 10px;font-weight:700}
+  .card{background:#fff;border:1px solid var(--borde);border-left:4px solid var(--c,#999);border-radius:12px;
+    padding:12px;margin-bottom:10px;display:flex;gap:12px;align-items:flex-start}
+  .card.hecho{opacity:.55}
+  .card.hecho .tit{text-decoration:line-through}
+  .chk{flex:none;width:36px;height:36px;border-radius:50%;border:2px solid #b8c1cc;background:#fff;
+    display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff;padding:0;font-size:1.1rem}
+  .card.hecho .chk{background:var(--c);border-color:var(--c)}
+  .body{flex:1;min-width:0;cursor:pointer}
+  .tag{font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--c)}
+  .tit{font-weight:650;font-size:1.05rem;word-wrap:break-word}
+  .meta{color:var(--gris);font-size:.93rem;margin-top:2px;word-wrap:break-word}
+  .cuando{display:inline-flex;align-items:center;gap:5px;font-weight:600;font-size:.88rem;padding:3px 9px;border-radius:6px;background:#eef1f5;color:#34404d;margin-top:7px}
+  .cuando.hoy{background:#fff1cc;color:#6b4e00}
+  .cuando.tarde{background:#fbe0de;color:#7a1f19}
+  .acciones{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .acc{display:inline-flex;align-items:center;gap:6px;text-decoration:none;font-weight:600;font-size:.98rem;
+    padding:9px 14px;border-radius:9px;color:#fff;background:var(--verde)}
+  .acc.mapa{background:#2f5d8a}
+  .acc.cal{background:#fff;color:#14304f;border:1px solid #14304f;font-family:inherit;cursor:pointer}
+  .vacio{text-align:center;color:var(--gris);padding:28px 12px;background:#fff;border-radius:12px;border:1px dashed var(--borde)}
+  .resumen{background:#fff;border:1px solid var(--borde);border-radius:12px;padding:12px 14px;margin-bottom:12px;color:var(--gris)}
+  .resumen b{color:var(--texto)}
+  .fab{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom) + 18px);
+    border:0;border-radius:12px;padding:16px 26px;font-size:1.1rem;font-weight:700;color:#fff;display:flex;align-items:center;gap:8px;
+    box-shadow:0 4px 14px rgba(0,0,0,.25);cursor:pointer;white-space:nowrap}
+  label{display:block;font-weight:600;margin:16px 2px 6px;font-size:.95rem}
+  input,textarea,select{width:100%;font-size:1.05rem;padding:13px;border:1px solid #c9d1db;border-radius:10px;
+    background:#fff;color:var(--texto);font-family:inherit}
+  input:focus,textarea:focus{outline:none;border-color:var(--nav);box-shadow:0 0 0 3px rgba(20,48,79,.12)}
+  textarea{min-height:100px;resize:vertical}
+  .fila{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .fila>div,.fila input{min-width:0}
+  .btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;border:0;border-radius:12px;padding:16px;font-size:1.1rem;font-weight:700;
+    color:#fff;background:var(--nav);margin-top:20px;cursor:pointer}
+  .btn.sec{background:#fff;color:var(--nav);border:1px solid var(--nav);margin-top:10px}
+  .btn.peligro{background:#fff;color:var(--rojo);border:1px solid var(--rojo);margin-top:10px}
+  .ayuda{color:var(--gris);font-size:.93rem;margin:6px 2px}
+  details summary{cursor:pointer;font-weight:600;margin:22px 2px 10px;color:var(--gris)}
+  .buscar{position:relative}
+  .buscar svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--gris)}
+  .buscar input{padding-left:42px}
+  .aviso{position:fixed;left:14px;right:14px;bottom:calc(env(safe-area-inset-bottom) + 92px);background:#1f2933;color:#fff;
+    padding:13px 16px;border-radius:10px;font-weight:600;text-align:center;z-index:20;opacity:0;transition:opacity .25s;pointer-events:none}
+  .aviso.ver{opacity:1}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+  .chip{border:1px solid #c9d1db;background:#fff;border-radius:8px;padding:9px 14px;font-size:.95rem;font-weight:600;cursor:pointer;color:var(--texto)}
+  .chip.on{background:var(--nav);color:#fff;border-color:var(--nav)}
+  .logoprev{display:block;max-height:80px;max-width:220px;margin:10px 2px;background:#fff;border:1px solid var(--borde);border-radius:8px;padding:6px}
+</style>
+</head>
+<body>
+<header>
+  <button class="hbtn" id="atras" hidden aria-label="Volver"></button>
+  <img id="logo" alt="" hidden>
+  <div class="htxt"><h1 id="cab">Agenda</h1><div id="sub"></div></div>
+  <button class="hbtn" id="ajustes" aria-label="Ajustes"></button>
+</header>
+<main id="app"></main>
+<div class="aviso" id="aviso"></div>
+
+<script>
+// ---------- Iconos (trazo fino) ----------
+const P = {
+  proyectos:'<path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>',
+  obras:'<rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4M8 6h.01M12 6h.01M16 6h.01M8 10h.01M12 10h.01M16 10h.01M8 14h.01M12 14h.01M16 14h.01"/>',
+  reuniones:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',
+  viajes:'<path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/>',
+  llamadas:'<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/>',
+  presupuestos:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/>',
+  pin:'<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>',
+  campana:'<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.94 1.94 0 0 0 3.4 0"/>',
+  check:'<path d="M20 6 9 17l-5-5"/>', plus:'<path d="M12 5v14M5 12h14"/>',
+  ajustes:'<path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/>',
+  atras:'<path d="m15 18-6-6 6-6"/>', buscar:'<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
+  cal:'<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
+  alerta:'<circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/>',
+  bajar:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>',
+  subir:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>',
+  borrar:'<path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',
+  imagen:'<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"/>',
+  guardar:'<path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/>',
+};
+const ic = n => `<svg class="i" viewBox="0 0 24 24" aria-hidden="true">${P[n]}</svg>`;
+
+// ---------- Apartados ----------
+const CATS = {
+  proyectos:   {nombre:'Proyectos',    uno:'proyecto',      color:'#2f5d8a',
+    campos:[['titulo','Nombre del proyecto','text'],['cliente','Cliente','text'],['fecha','Fecha de entrega','date'],['notas','Notas','textarea']]},
+  obras:       {nombre:'Visitas a obra',uno:'visita a obra', color:'#b5651d',
+    campos:[['titulo','Obra','text'],['direccion','Dirección / lugar','text'],['fecha','Día de la visita','date'],['hora','Hora','time'],['notas','Qué revisar','textarea']]},
+  reuniones:   {nombre:'Reuniones',    uno:'reunión',       color:'#5a4e8c',
+    campos:[['titulo','Asunto','text'],['con','Con quién','text'],['fecha','Día','date'],['hora','Hora','time'],['direccion','Lugar','text'],['notas','Notas','textarea']]},
+  viajes:      {nombre:'Viajes',       uno:'viaje',         color:'#2c7a7b',
+    campos:[['titulo','Destino','text'],['fecha','Día','date'],['hora','Hora de salida','time'],['notas','Motivo / notas','textarea']]},
+  llamadas:    {nombre:'Llamadas',     uno:'llamada',       color:'#2e7d4f',
+    campos:[['titulo','¿A quién?','text'],['telefono','Teléfono','tel'],['fecha','¿Cuándo?','date'],['notas','Para qué','textarea']]},
+  presupuestos:{nombre:'Presupuestos', uno:'presupuesto',   color:'#8c2f39',
+    campos:[['titulo','Cliente','text'],['concepto','Concepto','text'],['importe','Importe (€)','number'],['estado','Estado','estado'],['fecha','Fecha límite','date'],['notas','Notas','textarea']]},
+};
+const ESTADOS = ['Por hacer','Enviado','Aceptado','Rechazado'];
+
+// ---------- Datos ----------
+const KEY='agenda-padre-v1', KLOGO='agenda-logo', KNOM='agenda-nombre';
+let datos=[]; try{ datos=JSON.parse(localStorage.getItem(KEY))||[]; }catch(e){}
+const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}};
+const lsSet=(k,v)=>{try{ v==null?localStorage.removeItem(k):localStorage.setItem(k,v); return true }catch(e){ return false }};
+function guardar(){ if(!lsSet(KEY, JSON.stringify(datos))) aviso('No se pudo guardar. Haz una copia de seguridad.'); espejo(); }
+// Copia en IndexedDB para que el resumen diario (service worker) pueda leer los datos
+function espejo(){ try{ const r=indexedDB.open('agenda',1);
+  r.onupgradeneeded=()=>r.result.createObjectStore('kv');
+  r.onsuccess=()=>{ const tx=r.result.transaction('kv','readwrite'); tx.objectStore('kv').put(datos,'datos'); tx.oncomplete=()=>r.result.close(); };
+}catch(e){} }
+if(navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(()=>{});
+
+// ---------- Utilidades ----------
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const isoDe=d=>{d=new Date(d); d.setMinutes(d.getMinutes()-d.getTimezoneOffset()); return d.toISOString().slice(0,10)};
+const hoyISO=()=>isoDe(new Date());
+const diasHasta=f=>f?Math.round((new Date(f+'T00:00')-new Date(hoyISO()+'T00:00'))/86400000):null;
+const euros=n=>Number(n).toLocaleString('es-ES',{style:'currency',currency:'EUR'});
+function textoFecha(it){
+  if(!it.fecha) return '';
+  const n=diasHasta(it.fecha); let t;
+  if(n===0)t='Hoy'; else if(n===1)t='Mañana'; else if(n===-1)t='Ayer';
+  else t=new Date(it.fecha+'T00:00').toLocaleDateString('es-ES',{weekday:'short',day:'numeric',month:'short'});
+  if(it.hora) t+=' · '+it.hora;
+  const tarde=!it.hecho&&n<0, cls=it.hecho?'':tarde?'tarde':n===0?'hoy':'';
+  return `<span class="cuando ${cls}">${ic(tarde?'alerta':'cal')}${esc(t)}${tarde?' (atrasado)':''}</span>`;
+}
+function ordenar(a,b){
+  if(!!a.hecho!==!!b.hecho) return a.hecho?1:-1;
+  const fa=(a.fecha||'9999')+(a.hora||''), fb=(b.fecha||'9999')+(b.hora||'');
+  return fa<fb?-1:fa>fb?1:(b.creado-a.creado);
+}
+function aviso(t){const a=$('#aviso');a.textContent=t;a.classList.add('ver');clearTimeout(aviso.t);aviso.t=setTimeout(()=>a.classList.remove('ver'),2200)}
+
+// ---------- Tarjeta ----------
+function tarjeta(it,mostrarCat){
+  const c=CATS[it.cat], meta=[];
+  if(it.cliente)meta.push('Cliente: '+it.cliente);
+  if(it.con)meta.push('Con: '+it.con);
+  if(it.concepto)meta.push(it.concepto);
+  if(it.importe)meta.push(euros(it.importe));
+  if(it.estado)meta.push(it.estado);
+  if(it.direccion)meta.push(it.direccion);
+  if(it.telefono)meta.push(it.telefono);
+  let acc='';
+  if(it.telefono) acc+=`<a class="acc" href="tel:${esc(it.telefono.replace(/[^\d+]/g,''))}">${ic('llamadas')}Llamar</a>`;
+  if(it.direccion) acc+=`<a class="acc mapa" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(it.direccion)}">${ic('pin')}Cómo llegar</a>`;
+  if(it.fecha&&!it.hecho) acc+=`<button class="acc cal" data-cal="${it.id}">${ic('campana')}Avisar en el calendario</button>`;
+  return `<div class="card ${it.hecho?'hecho':''}" style="--c:${c.color}">
+    <button class="chk" data-hecho="${it.id}" aria-label="Marcar como hecho">${it.hecho?ic('check'):''}</button>
+    <div class="body" data-editar="${it.id}">
+      ${mostrarCat?`<div class="tag">${c.nombre}</div>`:''}
+      <div class="tit">${esc(it.titulo)}</div>
+      ${meta.length?`<div class="meta">${meta.map(esc).join(' · ')}</div>`:''}
+      ${it.notas?`<div class="meta">${esc(it.notas).replace(/\n/g,'<br>')}</div>`:''}
+      ${textoFecha(it)}
+      ${acc?`<div class="acciones">${acc}</div>`:''}
+    </div></div>`;
+}
+
+// ---------- Avisos en el calendario del móvil ----------
+const pad=n=>String(n).padStart(2,'0');
+function fechaHora(it,horas=0){ const d=new Date(it.fecha+'T'+(it.hora||'09:00')); d.setHours(d.getHours()+horas); return d; }
+const fmtLocal=d=>d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+'T'+pad(d.getHours())+pad(d.getMinutes())+'00';
+function textoCal(it){
+  const c=CATS[it.cat];
+  const det=[c.nombre, it.cliente&&'Cliente: '+it.cliente, it.con&&'Con: '+it.con, it.concepto, it.importe&&euros(it.importe),
+    it.telefono&&'Tel: '+it.telefono, it.notas].filter(Boolean).join('\n');
+  return {titulo:(it.cat==='llamadas'?'Llamar a ':'')+it.titulo, det, lugar:it.direccion||''};
+}
+function avisarCalendario(it){
+  const t=textoCal(it), ini=fechaHora(it), fin=fechaHora(it,1);
+  if(/android/i.test(navigator.userAgent)){
+    const u=new URL('https://calendar.google.com/calendar/render');
+    u.searchParams.set('action','TEMPLATE'); u.searchParams.set('text',t.titulo);
+    u.searchParams.set('dates',fmtLocal(ini)+'/'+fmtLocal(fin)); u.searchParams.set('ctz','Europe/Madrid');
+    if(t.det) u.searchParams.set('details',t.det); if(t.lugar) u.searchParams.set('location',t.lugar);
+    window.open(u.toString(),'_blank');
+    return;
+  }
+  const e=v=>String(v).replace(/[\\;,]/g,m=>'\\'+m).replace(/\n/g,'\\n');
+  const ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Agenda//ES','BEGIN:VEVENT',
+    'UID:'+it.id+'@agenda','DTSTAMP:'+new Date().toISOString().replace(/[-:]/g,'').slice(0,15)+'Z',
+    'DTSTART:'+fmtLocal(ini),'DTEND:'+fmtLocal(fin),'SUMMARY:'+e(t.titulo),
+    t.det?'DESCRIPTION:'+e(t.det):'', t.lugar?'LOCATION:'+e(t.lugar):'',
+    'BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:'+e(t.titulo),'TRIGGER:-PT1H','END:VALARM',
+    'BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:'+e(t.titulo),'TRIGGER:-P1D','END:VALARM',
+    'END:VEVENT','END:VCALENDAR'].filter(Boolean).join('\r\n');
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([ics],{type:'text/calendar'}));
+  a.download=(t.titulo.replace(/[^\w áéíóúñÁÉÍÓÚÑ-]/g,'').trim()||'aviso')+'.ics'; document.body.appendChild(a); a.click(); a.remove();
+}
+
+// ---------- Resumen diario (Android, app instalada) ----------
+async function activarResumen(){
+  if(!('Notification' in window)||!('serviceWorker' in navigator)){ alert('Este móvil no permite avisos automáticos desde la agenda. Use «Avisar en el calendario».'); return; }
+  const p=await Notification.requestPermission();
+  if(p!=='granted'){ alert('No se han permitido las notificaciones. Se pueden activar en los ajustes del navegador.'); return; }
+  const reg=await navigator.serviceWorker.ready; espejo();
+  let auto=false;
+  try{ if('periodicSync' in reg){ await reg.periodicSync.register('resumen',{minInterval:12*60*60*1000}); auto=true; } }catch(e){}
+  reg.showNotification('Avisos activados',{body:auto?'Recibirá un resumen de lo pendiente cada día.':'Este móvil no permite el resumen automático. Use «Avisar en el calendario».',icon:'icon-192.png'});
+  lsSet('agenda-resumen',auto?'1':null); ajustes();
+}
+
+// ---------- Pantallas ----------
+function inicio(){
+  setCabecera(lsGet(KNOM)||'Agenda', false, new Date().toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'}));
+  const pend=datos.filter(d=>!d.hecho);
+  const tiles=Object.entries(CATS).map(([k,c])=>{
+    const n=pend.filter(d=>d.cat===k).length;
+    return `<button class="tile" data-ir="#/${k}">
+      <span class="ic" style="background:${c.color}">${ic(k)}</span>
+      <span><b>${c.nombre}</b><small>${n?n+' pendiente'+(n>1?'s':''):'Nada pendiente'}</small></span></button>`;
+  }).join('');
+  const pronto=pend.filter(d=>d.fecha&&diasHasta(d.fecha)<=7).sort(ordenar);
+  $('#app').innerHTML=`
+    <div class="grid">${tiles}</div>
+    <h2>Hoy y próximos 7 días</h2>
+    ${pronto.length?pronto.map(d=>tarjeta(d,true)).join(''):
+      `<div class="vacio">No hay nada apuntado para estos días.</div>`}
+    <h2>Buscar</h2>
+    <div class="buscar">${ic('buscar')}<input id="q" type="search" placeholder="Nombre, obra, cliente…"></div>
+    <div id="res" style="margin-top:12px"></div>`;
+  $('#q').addEventListener('input',e=>{
+    const q=e.target.value.trim().toLowerCase();
+    if(!q){$('#res').innerHTML='';return}
+    const r=datos.filter(d=>JSON.stringify(d).toLowerCase().includes(q)).sort(ordenar);
+    $('#res').innerHTML=r.length?r.map(d=>tarjeta(d,true)).join(''):'<div class="vacio">Sin resultados</div>';
+  });
+}
+
+function lista(cat){
+  const c=CATS[cat]; setCabecera(c.nombre,true);
+  const items=datos.filter(d=>d.cat===cat).sort(ordenar);
+  const pend=items.filter(d=>!d.hecho), hechos=items.filter(d=>d.hecho);
+  let extra='';
+  if(cat==='presupuestos'&&pend.length){
+    const tot=pend.reduce((s,d)=>s+(+d.importe||0),0);
+    extra=`<div class="resumen">Pendientes: <b>${pend.length}</b> · Importe total: <b>${euros(tot)}</b></div>`;
+  }
+  $('#app').innerHTML=extra+
+    (pend.length?pend.map(d=>tarjeta(d)).join(''):`<div class="vacio">No hay nada pendiente.<br>Pulse «Añadir» para apuntar algo.</div>`)+
+    (hechos.length?`<details><summary>Hechos (${hechos.length})</summary>${hechos.map(d=>tarjeta(d)).join('')}</details>`:'')+
+    `<button class="fab" style="background:${c.color}" data-ir="#/nuevo/${cat}">${ic('plus')}Añadir ${c.uno}</button>`;
+}
+
+const chipsFecha=k=>`<div class="chips">
+  <button type="button" class="chip" data-dia="0" data-para="${k}">Hoy</button>
+  <button type="button" class="chip" data-dia="1" data-para="${k}">Mañana</button>
+  <button type="button" class="chip" data-dia="7" data-para="${k}">En una semana</button></div>`;
+
+function formulario(cat,id){
+  const it=id?datos.find(d=>d.id===id):null;
+  if(id&&!it) return go('#/');
+  cat=it?it.cat:cat; const c=CATS[cat];
+  setCabecera(it?'Editar '+c.uno:'Nuevo: '+c.uno,true);
+  const v=k=>esc(it?(it[k]??''):'');
+  let h='<form id="f">'; const cs=c.campos;
+  for(let i=0;i<cs.length;i++){
+    const [k,lab,tipo]=cs[i];
+    if(tipo==='date'&&cs[i+1]&&cs[i+1][2]==='time'){
+      const [k2,lab2]=cs[i+1];
+      h+=`<div class="fila"><div><label for="f_${k}">${lab}</label><input id="f_${k}" type="date" value="${v(k)}"></div>
+          <div><label for="f_${k2}">${lab2}</label><input id="f_${k2}" type="time" value="${v(k2)}"></div></div>${chipsFecha(k)}`;
+      i++; continue;
+    }
+    h+=`<label for="f_${k}">${lab}${i===0?' *':''}</label>`;
+    if(tipo==='textarea') h+=`<textarea id="f_${k}">${v(k)}</textarea>`;
+    else if(tipo==='estado') h+=`<div class="chips" style="margin-top:0">${ESTADOS.map(e=>
+      `<button type="button" class="chip ${((it&&it.estado)||'Por hacer')===e?'on':''}" data-estado="${e}">${e}</button>`).join('')}</div>`;
+    else h+=`<input id="f_${k}" type="${tipo}" value="${v(k)}" ${tipo==='number'?'inputmode="decimal" step="0.01"':''} ${tipo==='tel'?'inputmode="tel"':''} ${i===0?'required':''}>`;
+    if(tipo==='date') h+=chipsFecha(k);
+  }
+  h+=`<button class="btn" type="submit" style="background:${c.color}">${ic('guardar')}Guardar</button>`;
+  if(it) h+=`<button class="btn sec" type="button" id="hechoBtn">${ic('check')}${it.hecho?'Marcar como pendiente':'Marcar como hecho'}</button>
+             <button class="btn peligro" type="button" id="borrar">${ic('borrar')}Borrar</button>`;
+  $('#app').innerHTML=h+'</form>';
+  $('#f').addEventListener('click',e=>{
+    const d=e.target.closest('[data-dia]');
+    if(d){const f=new Date();f.setDate(f.getDate()+ +d.dataset.dia);$('#f_'+d.dataset.para).value=isoDe(f)}
+    const s=e.target.closest('[data-estado]');
+    if(s) document.querySelectorAll('[data-estado]').forEach(b=>b.classList.toggle('on',b===s));
+  });
+  $('#f').addEventListener('submit',e=>{
+    e.preventDefault();
+    const o=it||{id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),cat,creado:Date.now(),hecho:false};
+    cs.forEach(([k,,tipo])=>{
+      if(tipo==='estado'){const on=document.querySelector('[data-estado].on');o.estado=on?on.dataset.estado:'Por hacer'}
+      else o[k]=$('#f_'+k).value.trim();
+    });
+    if(!it) datos.push(o);
+    guardar(); aviso('Guardado'); history.back();
+  });
+  if(it){
+    $('#hechoBtn').onclick=()=>{it.hecho=!it.hecho;guardar();aviso(it.hecho?'Marcado como hecho':'Pendiente');history.back()};
+    $('#borrar').onclick=()=>{ if(confirm('¿Borrar «'+it.titulo+'»? No se puede deshacer.')){
+      datos=datos.filter(d=>d.id!==it.id);guardar();aviso('Borrado');history.back()} };
+  }
+  setTimeout(()=>{ if(!it) $('#f_'+cs[0][0]).focus() },50);
+}
+
+function ajustes(){
+  setCabecera('Ajustes',true);
+  const logo=lsGet(KLOGO);
+  $('#app').innerHTML=`
+    <h2>Avisos</h2>
+    <p class="ayuda">Para que el móvil avise a una hora concreta, pulse <b>«Avisar en el calendario»</b> en cualquier apunte con fecha:
+      se guarda en el calendario del teléfono con aviso. Funciona siempre, también sin conexión.</p>
+    <p class="ayuda">Además, en Android con la agenda instalada, puede recibir un <b>resumen diario</b> de lo pendiente.</p>
+    <button class="btn ${lsGet('agenda-resumen')?'sec':''}" id="resBtn">${ic('campana')}${lsGet('agenda-resumen')?'Resumen diario activado':'Activar resumen diario'}</button>
+    <h2>Logo de la empresa</h2>
+    <p class="ayuda">Elija una imagen del logo guardada en el móvil. Aparecerá arriba en la agenda.</p>
+    ${logo?`<img class="logoprev" src="${logo}" alt="Logo actual">`:''}
+    <button class="btn" id="logoBtn">${ic('imagen')}${logo?'Cambiar logo':'Poner logo de la empresa'}</button>
+    ${logo?`<button class="btn peligro" id="logoQuitar">${ic('borrar')}Quitar logo</button>`:''}
+    <input type="file" id="logoFile" accept="image/*" hidden>
+    <h2>Título de la agenda</h2>
+    <input id="nom" type="text" placeholder="Agenda" value="${esc(lsGet(KNOM)||'')}">
+    <button class="btn sec" id="nomBtn">${ic('guardar')}Guardar título</button>
+    <h2>Copia de seguridad</h2>
+    <p class="ayuda">Los datos se guardan solo en este móvil. Conviene descargar una copia de vez en cuando.</p>
+    <button class="btn" id="exp">${ic('bajar')}Descargar copia</button>
+    <button class="btn sec" id="impBtn">${ic('subir')}Recuperar desde una copia</button>
+    <input type="file" id="imp" accept=".json,application/json" hidden>
+    <h2>Instalar en el móvil</h2>
+    <p class="ayuda"><b>Android (Chrome):</b> menú ⋮ → «Instalar aplicación» o «Añadir a pantalla de inicio».<br>
+      <b>iPhone (Safari):</b> botón Compartir → «Añadir a pantalla de inicio».<br>Una vez instalada funciona sin conexión.</p>
+    <p class="ayuda" style="margin-top:20px">Apuntes guardados: <b>${datos.length}</b></p>`;
+  $('#resBtn').onclick=activarResumen;
+  $('#logoBtn').onclick=()=>$('#logoFile').click();
+  $('#logoFile').onchange=e=>{
+    const f=e.target.files[0]; if(!f) return;
+    const img=new Image(); img.onload=()=>{
+      const m=400, r=Math.min(1,m/Math.max(img.width,img.height));
+      const cv=document.createElement('canvas'); cv.width=Math.round(img.width*r); cv.height=Math.round(img.height*r);
+      cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height);
+      if(lsSet(KLOGO,cv.toDataURL('image/png'))){ ponerLogo(); aviso('Logo guardado'); ajustes(); }
+      else aviso('La imagen es demasiado grande');
+      URL.revokeObjectURL(img.src);
+    };
+    img.src=URL.createObjectURL(f);
+  };
+  if(logo) $('#logoQuitar').onclick=()=>{lsSet(KLOGO,null);ponerLogo();ajustes()};
+  $('#nomBtn').onclick=()=>{lsSet(KNOM,$('#nom').value.trim()||null);aviso('Título guardado')};
+  $('#exp').onclick=()=>{
+    const blob=new Blob([JSON.stringify({app:'agenda',version:1,fecha:new Date().toISOString(),datos},null,1)],{type:'application/json'});
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='agenda-copia-'+hoyISO()+'.json';
+    document.body.appendChild(a);a.click();a.remove();aviso('Copia descargada');
+  };
+  $('#impBtn').onclick=()=>$('#imp').click();
+  $('#imp').onchange=async e=>{
+    const f=e.target.files[0]; if(!f) return;
+    try{
+      const j=JSON.parse(await f.text()), l=Array.isArray(j)?j:j.datos;
+      if(!Array.isArray(l)) throw 0;
+      if(!confirm('Se cargarán '+l.length+' apuntes y se sustituirán los actuales. ¿Seguir?')) return;
+      datos=l.filter(d=>d&&d.id&&CATS[d.cat]);guardar();aviso('Copia recuperada');go('#/');
+    }catch(err){alert('Ese archivo no es una copia válida de la agenda.')}
+  };
+}
+
+// ---------- Navegación ----------
+function ponerLogo(){const l=lsGet(KLOGO),im=$('#logo');if(l){im.src=l;im.hidden=false}else{im.hidden=true;im.removeAttribute('src')}}
+function setCabecera(t,volver,sub){
+  $('#cab').textContent=t; $('#sub').textContent=sub?sub[0].toUpperCase()+sub.slice(1):''; $('#sub').hidden=!sub;
+  $('#atras').hidden=!volver; $('#ajustes').hidden=volver; $('#logo').hidden=volver||!lsGet(KLOGO);
+  window.scrollTo(0,0);
+}
+function go(h){location.hash=h}
+function router(){
+  const p=(location.hash||'#/').slice(2).split('/');
+  if(p[0]==='nuevo'&&CATS[p[1]]) formulario(p[1]);
+  else if(p[0]==='editar') formulario(null,p[1]);
+  else if(p[0]==='ajustes') ajustes();
+  else if(CATS[p[0]]) lista(p[0]);
+  else inicio();
+}
+$('#atras').innerHTML=ic('atras')+'Volver';
+$('#ajustes').innerHTML=ic('ajustes');
+window.addEventListener('hashchange',router);
+$('#atras').onclick=()=>history.length>1?history.back():go('#/');
+$('#ajustes').onclick=()=>go('#/ajustes');
+document.addEventListener('click',e=>{
+  const ir=e.target.closest('[data-ir]'); if(ir){go(ir.dataset.ir);return}
+  const ca=e.target.closest('[data-cal]'); if(ca){const it=datos.find(d=>d.id===ca.dataset.cal); if(it) avisarCalendario(it); return}
+  const h=e.target.closest('[data-hecho]');
+  if(h){const it=datos.find(d=>d.id===h.dataset.hecho);if(it){it.hecho=!it.hecho;guardar();aviso(it.hecho?'Marcado como hecho':'Pendiente');router()}return}
+  const ed=e.target.closest('[data-editar]');
+  if(ed&&!e.target.closest('a')) go('#/editar/'+ed.dataset.editar);
+});
+ponerLogo(); router(); espejo();
+
+if('serviceWorker' in navigator&&location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+
+</body>
+</html>
